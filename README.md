@@ -2,7 +2,7 @@
 
 > Daily research, weekly food scans, monthly dinners. For everyone living with a chronic condition.
 
-A YC-grade prototype of [Mira](https://mira.vercel.app) — a quiet companion for the time between doctor visits.
+A [Mira](https://mira.vercel.app) — a quiet companion for the time between doctor visits.
 
 - **Today** — A morning brief of recent clinical research for your condition, summarized in plain English with full citations. Sourced from PubMed.
 - **Scan** — Type or photograph a barcode; get a fit verdict against the public dietary guideline for your condition. Sourced from Open Food Facts.
