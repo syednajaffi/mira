@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    @apply bg-amber-wash text-ink;
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-teal ring-offset-2 ring-offset-paper rounded-sm;
+  }
+
+  hr {
+    @apply border-paper-line;
+  }
+
+  a {
+    @apply underline-offset-4;
+  }
+}
+
+@layer components {
+  .container-prose {
+    @apply mx-auto max-w-readable px-6;
+  }
+  .container-page {
+    @apply mx-auto max-w-6xl px-6;
+  }
+  .reading {
+    @apply font-serif text-[1.0625rem] leading-[1.75] text-ink-soft;
+  }
+  .reading p + p {
+    @apply mt-4;
+  }
+  .label {
+    @apply text-xs uppercase tracking-[0.14em] text-ink-muted;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-paper-line bg-paper px-2.5 py-1 text-xs text-ink-soft;
+  }
+  .surface {
+    @apply rounded-lg bg-paper-soft border border-paper-line;
+  }
+}
