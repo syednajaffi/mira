@@ -1,8 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
+import Script from "next/script";
 import { Button } from "./ui/button";
 import { CONDITION_LIST } from "@/lib/conditions";
+import { TurnstileWidget } from "./turnstile-widget";
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 const COUNTRIES = [
   { code: "IN", label: "India" },
@@ -28,8 +32,11 @@ export function WaitlistForm({ compact = false }: { compact?: boolean }) {
   const [city, setCity] = useState("");
   const [condition, setCondition] = useState<string>("");
   const [role, setRole] = useState("patient");
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const handleToken = useCallback((token: string) => setTurnstileToken(token), []);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,7 +46,7 @@ export function WaitlistForm({ compact = false }: { compact?: boolean }) {
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, country, city, condition, role })
+        body: JSON.stringify({ email, country, city, condition, role, turnstileToken })
       });
       const json = await res.json();
       if (!res.ok) {
@@ -160,6 +167,18 @@ export function WaitlistForm({ compact = false }: { compact?: boolean }) {
               ))}
             </div>
           </div>
+        </>
+      )}
+
+      {TURNSTILE_SITE_KEY && (
+        <>
+          <Script
+            src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+            strategy="afterInteractive"
+            async
+            defer
+          />
+          <TurnstileWidget siteKey={TURNSTILE_SITE_KEY} onToken={handleToken} />
         </>
       )}
 

@@ -1,0 +1,47 @@
+# Dependabot — automated dependency security PRs.
+# Runs every Monday, opens grouped PRs for npm + GitHub Actions.
+# Docs: https://docs.github.com/code-security/dependabot
+
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    versioning-strategy: "increase-if-necessary"
+    labels:
+      - "dependencies"
+      - "javascript"
+    groups:
+      production-deps:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      dev-deps:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # We pin Next.js to a specific minor for build determinism.
+      # Major upgrades will arrive as separate, unbatched PRs we review by hand.
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "github-actions"
