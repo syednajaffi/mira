@@ -57,7 +57,7 @@ export async function lookupBarcode(barcode: string): Promise<OFFProduct | null>
 
   const res = await fetch(url, {
     headers: {
-      "User-Agent": "Mira/0.1 (https://mira.health) — patient nutrition education"
+      "User-Agent": "Mira/0.1 (https://mira.health) - patient nutrition education"
     },
     next: { revalidate: 86400 }
   });
