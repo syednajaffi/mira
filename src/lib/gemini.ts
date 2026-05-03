@@ -4,6 +4,10 @@ import { pickFirstObject } from "./utils";
 import type { ConditionId } from "./conditions";
 import { CONDITIONS } from "./conditions";
 
+// Centralized model name — easy to swap when Google retires versions.
+// gemini-1.5-flash was retired in 2025; gemini-2.5-flash is the current stable.
+const GEMINI_MODEL = "gemini-2.5-flash";
+
 let _client: GoogleGenerativeAI | null = null;
 
 function getClient() {
@@ -43,7 +47,7 @@ export async function summarizePaper(args: {
 }): Promise<PaperSummary> {
   const cond = CONDITIONS[args.condition];
   const model = getClient().getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: GEMINI_MODEL,
     generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
     systemInstruction: SUMMARY_PROMPT
   });
@@ -101,7 +105,7 @@ export async function generateFitVerdict(args: {
 }): Promise<FitVerdict> {
   const cond = CONDITIONS[args.condition];
   const model = getClient().getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: GEMINI_MODEL,
     generationConfig: { temperature: 0.1, responseMimeType: "application/json" },
     systemInstruction: SCAN_PROMPT
   });
@@ -143,7 +147,7 @@ export async function generateFitVerdict(args: {
 
 export async function recognizeFoodFromImage(imageBase64: string, mimeType: string): Promise<string> {
   const model = getClient().getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: GEMINI_MODEL,
     generationConfig: { temperature: 0.0, responseMimeType: "application/json" },
     systemInstruction:
       "You are a food identification assistant. Given a photo of a food item or packaged product, output JSON: { \"name\": string, \"brand\": string|null, \"category\": string, \"barcodeVisible\": string|null }. If you cannot identify, set name to \"Unknown food\". Output only the JSON object."
