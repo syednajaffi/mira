@@ -24,11 +24,11 @@ interface Out {
 
 export async function GET(req: NextRequest) {
   const ip = clientIp(req);
-  const limit = await rateLimit("papers", ip, LIMIT, WINDOW_SECONDS);
-  if (!limit.ok) {
+  const rl = await rateLimit("papers", ip, LIMIT, WINDOW_SECONDS);
+  if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many requests. Try again later." },
-      { status: 429, headers: rateLimitHeaders(limit, LIMIT) }
+      { status: 429, headers: rateLimitHeaders(rl, LIMIT) }
     );
   }
 
