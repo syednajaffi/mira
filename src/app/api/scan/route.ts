@@ -116,7 +116,15 @@ export async function POST(req: NextRequest) {
       guidelines: CONDITIONS[condition].dietaryGuidelines
     });
   } catch (err) {
-    console.error("[scan] lookup error", err);
-    return NextResponse.json({ error: "Lookup failed" }, { status: 502 });
+    const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error("[scan] lookup error:", message, stack);
+    return NextResponse.json(
+      {
+        error: "Lookup failed",
+        debug: { message, where: "scan-route" }
+      },
+      { status: 502 }
+    );
   }
 }
