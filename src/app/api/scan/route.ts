@@ -4,9 +4,13 @@ import { lookupBarcode, nutritionForPrompt } from "@/lib/openfoodfacts";
 import { generateFitVerdict, recognizeFoodFromImage } from "@/lib/gemini";
 import { isConditionId, CONDITIONS } from "@/lib/conditions";
 import { hasGemini } from "@/lib/env";
+import { clientIp, rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const LIMIT = 30;
+const WINDOW_SECONDS = 3600; // 30 scans per hour per IP
 
 const Body = z.object({
   condition: z.enum(["t2d", "htn", "asthma"]),
@@ -15,6 +19,15 @@ const Body = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const ip = clientIp(req);
+  const limit = await rateLimit("scan", ip, LIMIT, WINDOW_SECONDS);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Slow down — you've hit the hourly scan limit. Try again soon." },
+      { status: 429, headers: rateLimitHeaders(limit, LIMIT) }
+    );
+  }
+
   let payload: unknown;
   try {
     payload = await req.json();

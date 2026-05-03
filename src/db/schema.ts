@@ -124,6 +124,16 @@ export const eventInterest = pgTable(
   })
 );
 
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    key: varchar("key", { length: 200 }).primaryKey(),
+    count: integer("count").notNull().default(1),
+    windowStart: timestamp("window_start", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+  }
+);
+
 export type Waitlist = typeof waitlist.$inferSelect;
 export type NewWaitlist = typeof waitlist.$inferInsert;
 export type Paper = typeof papers.$inferSelect;
