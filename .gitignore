@@ -25,3 +25,5 @@ next-env.d.ts
 .turbo
 
 drizzle/
+
+.vercel
