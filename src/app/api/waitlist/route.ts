@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getDb, schema } from "@/lib/db";
-import { hasDatabase } from "@/lib/env";
+import { hasDatabase, hasTurnstile } from "@/lib/env";
 import { clientIp, isDisposableEmail, rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,7 +17,8 @@ const Body = z.object({
   city: z.string().max(64).optional().nullable(),
   condition: z.enum(["t2d", "htn", "asthma", ""]).optional().nullable(),
   role: z.enum(["patient", "caregiver", "clinician", "other"]).optional().nullable(),
-  referrer: z.string().max(256).optional().nullable()
+  referrer: z.string().max(256).optional().nullable(),
+  turnstileToken: z.string().max(2048).optional().nullable()
 });
 
 export async function POST(req: NextRequest) {
@@ -34,7 +36,17 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  const { email, country, city, condition, role, referrer } = parsed.data;
+  const { email, country, city, condition, role, referrer, turnstileToken } = parsed.data;
+
+  if (hasTurnstile) {
+    const ts = await verifyTurnstile(turnstileToken ?? undefined, clientIp(req));
+    if (!ts.ok) {
+      return NextResponse.json(
+        { error: "Bot check failed. Refresh and try again." },
+        { status: 400 }
+      );
+    }
+  }
 
   if (isDisposableEmail(email)) {
     return NextResponse.json(

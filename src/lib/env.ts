@@ -5,7 +5,9 @@ const schema = z.object({
   GOOGLE_AI_API_KEY: z.string().min(10).optional(),
   NCBI_API_KEY: z.string().optional(),
   NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
-  ADMIN_TOKEN: z.string().optional()
+  ADMIN_TOKEN: z.string().optional(),
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
+  TURNSTILE_SECRET_KEY: z.string().optional()
 });
 
 const parsed = schema.safeParse({
@@ -13,7 +15,9 @@ const parsed = schema.safeParse({
   GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY,
   NCBI_API_KEY: process.env.NCBI_API_KEY,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-  ADMIN_TOKEN: process.env.ADMIN_TOKEN
+  ADMIN_TOKEN: process.env.ADMIN_TOKEN,
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+  TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY
 });
 
 if (!parsed.success) {
@@ -28,8 +32,11 @@ export const env = parsed.success
       GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY,
       NCBI_API_KEY: process.env.NCBI_API_KEY,
       NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-      ADMIN_TOKEN: process.env.ADMIN_TOKEN
+      ADMIN_TOKEN: process.env.ADMIN_TOKEN,
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+      TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY
     };
 
 export const hasDatabase = Boolean(env.DATABASE_URL);
 export const hasGemini = Boolean(env.GOOGLE_AI_API_KEY);
+export const hasTurnstile = Boolean(env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY);

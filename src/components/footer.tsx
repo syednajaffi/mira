@@ -40,6 +40,7 @@ export function Footer() {
           <p className="label mb-3">Trust</p>
           <ul className="space-y-2 text-ink-soft">
             <li><Link href="/legal/privacy" className="no-underline hover:text-ink">Privacy</Link></li>
+            <li><Link href="/legal/security" className="no-underline hover:text-ink">Security</Link></li>
             <li><Link href="/legal/terms" className="no-underline hover:text-ink">Terms</Link></li>
             <li><Link href="/legal/medical-disclaimer" className="no-underline hover:text-ink">Medical disclaimer</Link></li>
           </ul>
