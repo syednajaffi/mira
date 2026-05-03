@@ -3,9 +3,13 @@ import { fetchRecentPapers } from "@/lib/pubmed";
 import { summarizePaper, type PaperSummary } from "@/lib/gemini";
 import { isConditionId } from "@/lib/conditions";
 import { hasGemini } from "@/lib/env";
+import { clientIp, rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const revalidate = 21600; // 6 hours
+
+const LIMIT = 60;
+const WINDOW_SECONDS = 3600; // 60 paper fetches per hour per IP
 
 interface Out {
   pmid: string;
@@ -19,6 +23,15 @@ interface Out {
 }
 
 export async function GET(req: NextRequest) {
+  const ip = clientIp(req);
+  const limit = await rateLimit("papers", ip, LIMIT, WINDOW_SECONDS);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again later." },
+      { status: 429, headers: rateLimitHeaders(limit, LIMIT) }
+    );
+  }
+
   const condition = req.nextUrl.searchParams.get("condition") ?? "t2d";
   if (!isConditionId(condition)) {
     return NextResponse.json({ error: "Invalid condition" }, { status: 400 });

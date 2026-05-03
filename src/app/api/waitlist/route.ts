@@ -2,9 +2,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getDb, schema } from "@/lib/db";
 import { hasDatabase } from "@/lib/env";
+import { clientIp, isDisposableEmail, rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const LIMIT = 5;
+const WINDOW_SECONDS = 3600; // 5 signups per hour per IP
 
 const Body = z.object({
   email: z.string().email().max(320),
@@ -32,13 +36,28 @@ export async function POST(req: NextRequest) {
   }
   const { email, country, city, condition, role, referrer } = parsed.data;
 
+  if (isDisposableEmail(email)) {
+    return NextResponse.json(
+      { error: "Please use a real email — disposable addresses are not accepted." },
+      { status: 400 }
+    );
+  }
+
+  const ip = clientIp(req);
+  const limit = await rateLimit("waitlist", ip, LIMIT, WINDOW_SECONDS);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Too many signups from this network. Try again later." },
+      { status: 429, headers: rateLimitHeaders(limit, LIMIT) }
+    );
+  }
+
   if (!hasDatabase) {
     // Graceful: log and accept so the landing page works even before DB is wired.
     console.log("[waitlist] (no DB configured) signup:", { email, country, city, condition, role });
     return NextResponse.json({ ok: true, note: "logged" });
   }
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   const ua = req.headers.get("user-agent") ?? null;
 
   try {
@@ -61,5 +80,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not record signup" }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json(
+    { ok: true },
+    { headers: rateLimitHeaders(limit, LIMIT) }
+  );
 }
