@@ -1,6 +1,6 @@
 # Mira
 
-> Daily research, weekly food scans, monthly dinners. For everyone living with a chronic condition.
+> Daily research, food scans & monthly dinners. For everyone living with a chronic condition.
 
 [Mira](https://mira.vercel.app) — a quiet companion for the time between doctor visits.
 
